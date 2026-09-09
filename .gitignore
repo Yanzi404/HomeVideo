@@ -1,0 +1,26 @@
+# Java / Spring Boot
+server/target/
+server/data/
+*.class
+*.jar
+*.war
+*.log
+
+# Android / Gradle
+client/.gradle/
+client/local.properties
+client/.idea/
+client/build/
+client/app/build/
+client/.externalNativeBuild/
+client/.cxx/
+client/captures/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
