@@ -1,5 +1,9 @@
 package art.ayachinene.homevideo.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,6 +58,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import art.ayachinene.homevideo.data.model.DirectoryItem
 import art.ayachinene.homevideo.data.model.HistoryItem
+import art.ayachinene.homevideo.ui.components.ShimmerHomeLoading
 import art.ayachinene.homevideo.ui.components.ThumbnailPlaceholder
 import art.ayachinene.homevideo.ui.theme.CSGOColors
 import art.ayachinene.homevideo.ui.theme.PlaceholderColors
@@ -84,7 +89,7 @@ fun HomeScreen(
     ) {
         when (uiState.connectionState) {
             is ConnectionState.Loading -> {
-                LoadingContent("Connecting to server...")
+                ShimmerHomeLoading()
             }
             is ConnectionState.Error -> {
                 ErrorContent(
@@ -227,6 +232,8 @@ private fun HeroBanner(
     val focusRequester = remember { FocusRequester() }
     val title = item.videoName.substringBeforeLast(".")
     var isFocused by remember { mutableStateOf(false) }
+    val heroScale by animateFloatAsState(if (isFocused) 1.0f else 0.98f, label = "heroScale")
+    val heroShadow by animateDpAsState(if (isFocused) 16.dp else 0.dp, label = "heroShadow")
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -240,9 +247,9 @@ private fun HeroBanner(
             .clip(RoundedCornerShape(8.dp))
             .focusRequester(focusRequester)
             .onFocusChanged { isFocused = it.isFocused }
-            .scale(if (isFocused) 1.0f else 0.98f)
+            .scale(heroScale)
             .graphicsLayer {
-                shadowElevation = if (isFocused) 16.dp.toPx() else 0f
+                shadowElevation = heroShadow.toPx()
             }
     ) {
         Box {
@@ -365,6 +372,17 @@ private fun VideoCard(
 ) {
     val focusRequester = remember { FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
+    val cardScale by animateFloatAsState(
+        targetValue = if (isFocused) 1.08f else 1.0f,
+        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+        label = "cardScale"
+    )
+    val cardShadow by animateDpAsState(if (isFocused) 12.dp else 0.dp, label = "cardShadow")
+    val cardBorderAlpha by animateFloatAsState(
+        targetValue = if (isFocused) 1.0f else 0.0f,
+        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+        label = "cardBorder"
+    )
     val displayName = item.name.substringBeforeLast(".")
 
     Surface(
@@ -375,13 +393,14 @@ private fun VideoCard(
             .background(CSGOColors.Card)
             .focusRequester(focusRequester)
             .onFocusChanged { isFocused = it.isFocused }
-            .scale(if (isFocused) 1.08f else 1.0f)
+            .scale(cardScale)
             .graphicsLayer {
-                shadowElevation = if (isFocused) 12.dp.toPx() else 0f
+                shadowElevation = cardShadow.toPx()
             }
-            .then(
-                if (isFocused) Modifier.border(2.dp, CSGOColors.Primary, RoundedCornerShape(6.dp))
-                else Modifier
+            .border(
+                2.dp,
+                CSGOColors.Primary.copy(alpha = cardBorderAlpha),
+                RoundedCornerShape(6.dp)
             )
     ) {
         Column {
@@ -415,19 +434,6 @@ private fun VideoCard(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)
             )
         }
-    }
-}
-
-@Composable
-private fun LoadingContent(message: String) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        CircularProgressIndicator()
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(message)
     }
 }
 
