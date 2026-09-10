@@ -45,6 +45,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
 
     // Compose for TV
+    implementation("androidx.compose.material3:material3")
     implementation("androidx.tv:tv-foundation:1.0.0-alpha11")
     implementation("androidx.tv:tv-material:1.0.0")
 
@@ -52,6 +53,10 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.5.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.5.1")
     implementation("androidx.media3:media3-ui:1.5.1")
+    implementation("androidx.media3:media3-datasource-okhttp:1.5.1")
+
+    // DataStore
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

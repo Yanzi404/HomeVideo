@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import art.ayachinene.homevideo.config.HomeVideoProperties;
 import art.ayachinene.homevideo.dto.DirectoryItem;
 import art.ayachinene.homevideo.dto.DirectoryResponse;
+import art.ayachinene.homevideo.dto.LibraryFolder;
+import art.ayachinene.homevideo.dto.LibraryResponse;
 
 @Service
 public class FileService {
@@ -77,6 +79,40 @@ public class FileService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to search files", e);
         }
+    }
+
+    public LibraryResponse getLibrary() {
+        List<LibraryFolder> folders;
+        try (Stream<Path> stream = Files.list(mediaRoot)) {
+            folders = stream
+                    .filter(Files::isDirectory)
+                    .sorted(Comparator.comparing(p -> p.getFileName().toString().toLowerCase()))
+                    .map(this::toLibraryFolder)
+                    .filter(f -> !f.videos().isEmpty())
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to list library", e);
+        }
+        return new LibraryResponse(folders);
+    }
+
+    private LibraryFolder toLibraryFolder(Path dir) {
+        String folderName = dir.getFileName().toString();
+        String relativePath = mediaRoot.relativize(dir).toString();
+
+        List<DirectoryItem> videos;
+        try (Stream<Path> stream = Files.list(dir)) {
+            videos = stream
+                    .filter(Files::isRegularFile)
+                    .filter(this::isVideoFile)
+                    .map(this::toItem)
+                    .sorted(Comparator.comparing(DirectoryItem::name))
+                    .toList();
+        } catch (IOException e) {
+            videos = List.of();
+        }
+
+        return new LibraryFolder(folderName, relativePath, videos);
     }
 
     private DirectoryItem toItem(Path path) {

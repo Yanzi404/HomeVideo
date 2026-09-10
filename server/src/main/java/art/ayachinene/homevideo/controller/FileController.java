@@ -1,10 +1,8 @@
 package art.ayachinene.homevideo.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import art.ayachinene.homevideo.dto.DirectoryItem;
 import art.ayachinene.homevideo.dto.DirectoryResponse;
+import art.ayachinene.homevideo.dto.LibraryResponse;
 import art.ayachinene.homevideo.service.FileService;
 
 @RestController
@@ -39,8 +38,8 @@ public class FileController {
         return ResponseEntity.ok(fileService.searchFiles(keyword));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    @GetMapping("/library")
+    public ResponseEntity<LibraryResponse> getLibrary() {
+        return ResponseEntity.ok(fileService.getLibrary());
     }
 }
